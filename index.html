@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JoinInPrayer - Unite in Faith</title>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/babel-standalone@7.22.9/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState } = React;
+
+    const StoryCard = ({ story, onUpvote }) => (
+      <div className="bg-white p-4 rounded-lg shadow-md mb-4">
+        <h3 className="text-lg font-semibold">{story.title}</h3>
+        <p className="text-gray-600">{story.content}</p>
+        <p className="text-sm text-gray-500">Posted by {story.author}</p>
+        <div className="flex items-center mt-2">
+          <button
+            onClick={() => onUpvote(story.id)}
+            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+          >
+            Pray ({story.upvotes})
+          </button>
+          <a
+            href={story.affiliateLink}
+            target="_blank"
+            className="ml-4 text-blue-500 hover:underline"
+          >
+            Support this Cause
+          </a>
+          <div className="ml-4 flex space-x-2">
+            <button
+              onClick={() => navigator.share({
+                url: `https://joininprayer.shop/story/${story.id}`,
+                title: `Pray for ${story.title}!`,
+                text: `Join me in praying for this cause on JoinInPrayer! #JoinInPrayer #ChristianSolidarity`
+              })}
+              className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+            >
+              Share
+            </button>
+            <a
+              href={`https://x.com/intent/tweet?text=Join me in praying for ${encodeURIComponent(story.title)}! ${encodeURIComponent(`https://joininprayer.shop/story/${story.id}`)} #JoinInPrayer #ChristianSolidarity`}
+              target="_blank"
+              className="bg-blue-400 text-white px-3 py-1 rounded hover:bg-blue-500"
+            >
+              Post on X
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+
+    const DevotionCard = ({ devotion }) => (
+      <div className="bg-gray-100 p-4 rounded-lg shadow-md mb-4">
+        <h3 className="text-lg font-semibold">Daily Devotion</h3>
+        <p className="text-gray-600">{devotion.content}</p>
+        <p className="text-sm text-gray-500">Scripture: {devotion.scripture}</p>
+      </div>
+    );
+
+    const App = () => {
+      const [stories, setStories] = useState([
+        {
+          id: 1,
+          title: "Help for a Family in Need",
+          content: "A family lost their home in a fire. They need prayers and support.",
+          author: "John D.",
+          upvotes: 10,
+          affiliateLink: "https://gofundme.com/example",
+        },
+      ]);
+      const [devotion] = useState({
+        content: "Cast all your anxiety on Him because He cares for you.",
+        scripture: "1 Peter 5:7",
+      });
+      const [newStory, setNewStory] = useState({ title: "", content: "", affiliateLink: "" });
+
+      const handleUpvote = (id) => {
+        setStories(stories.map(story =>
+          story.id === id ? { ...story, upvotes: story.upvotes + 1 } : story
+        ));
+      };
+
+      const handleSubmitStory = (e) => {
+        e.preventDefault();
+        setStories([...stories, {
+          id: stories.length + 1,
+          title: newStory.title,
+          content: newStory.content,
+          author: "Anonymous",
+          upvotes: 0,
+          affiliateLink: newStory.affiliateLink,
+        }]);
+        setNewStory({ title: "", content: "", affiliateLink: "" });
+      };
+
+      return (
+        <div className="min-h-screen bg-gray-100">
+          <header className="bg-blue-600 text-white p-4 text-center">
+            <h1 className="text-3xl font-bold">JoinInPrayer</h1>
+            <p className="text-lg">Unite in Faith, Pray for Those in Need</p>
+          </header>
+          <main className="max-w-4xl mx-auto p-4">
+            <DevotionCard devotion={devotion} />
+            <h2 className="text-2xl font-semibold mb-4">Stories of the Day</h2>
+            {stories.sort((a, b) => b.upvotes - a.upvotes).map(story => (
+              <StoryCard key={story.id} story={story} onUpvote={handleUpvote} />
+            ))}
+            <h2 className="text-2xl font-semibold mb-4 mt-8">Share Your Story</h2>
+            <div className="bg-white p-4 rounded-lg shadow-md">
+              <input
+                type="text"
+                placeholder="Story Title"
+                value={newStory.title}
+                onChange={(e) => setNewStory({ ...newStory, title: e.target.value })}
+                className="w-full p-2 mb-2 border rounded"
+              />
+              <textarea
+                placeholder="Your Story"
+                value={newStory.content}
+                onChange={(e) => setNewStory({ ...newStory, content: e.target.value })}
+                className="w-full p-2 mb-2 border rounded"
+              />
+              <input
+                type="text"
+                placeholder="Affiliate Link (e.g., GoFundMe)"
+                value={newStory.affiliateLink}
+                onChange={(e) => setNewStory({ ...newStory, affiliateLink: e.target.value })}
+                className="w-full p-2 mb-2 border rounded"
+              />
+              <button
+                onClick={handleSubmitStory}
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              >
+                Submit Story
+              </button>
+            </div>
+          </main>
+          <footer className="bg-blue-600 text-white p-4 text-center">
+            <p>&copy; 2025 JoinInPrayer. All rights reserved.</p>
+          </footer>
+        </div>
+      );
+    };
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
